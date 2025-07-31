@@ -1,6 +1,5 @@
 /* 
  data width 
-77~75      |74 73     |72~68     |67~64       |63~0
 type(3bits)|vch(2bits)|num(5bits)|index(4bits)|先存router path ，走過的path存ROUTERID (4*16bits)
 63~61      |60 59     |58~54     |53~50       |49~0 (49~18path)
  */
