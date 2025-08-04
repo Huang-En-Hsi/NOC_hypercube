@@ -82,8 +82,7 @@ assign req = req0 | req1 | req2 | req3; // req取决于任意一个输入信号�
 //在st_stage send == 1時才傳入 so 用last 上一個
 assign odata = (last[0] == 1) ? idata0 :
                (last[1] == 1) ? idata1 : 
-               (last[2] == 1) ? idata2 : 
-               (last[3] == 1) ? idata3 : `DATA_WIDTH'b0; // odata根据last的值选择对应的输入数据
+               (last[2] == 1) ? idata2 : idata3; // odata根据last的值选择对应的输入数据
 
 assign ovch =  (last[0] == 1) ? ivch0 :
                (last[1] == 1) ? ivch1 :

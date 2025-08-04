@@ -1,7 +1,7 @@
 /* 
  data width 
-type(3bits)|vch(2bits)|num(5bits)|index(4bits)|先存router path ，走過的path存ROUTERID (4*16bits)
-63~61      |60 59     |58~54     |53~50       |49~0 (49~18path)
+type(3bits)|vch(2bits)|num(5bits)|index(5bits)|先存router path ，走過的path存ROUTERID (4*16bits)
+63~61      |60 59     |58~54     |53~49       |48~0 (48~17path)
  */
 
 //
@@ -16,11 +16,11 @@ type(3bits)|vch(2bits)|num(5bits)|index(4bits)|先存router path ，走過的pat
 `define NUM_LSB         54
 `define NUM_MSB         58
 
-`define IDX_LSB         50
+`define IDX_LSB         49
 `define IDX_MSB         53
 
 `define DATA_LSB        0
-`define DATA_MSB        49
+`define DATA_MSB        48
 
 /* flit type *///需要嗎?
 `define TYPEW           3      

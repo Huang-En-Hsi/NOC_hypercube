@@ -63,7 +63,7 @@ module smallPath(
                 data_2_o[i] = ((tb(i) + data_2_i[0]) > 3) ? 0 : (tb(i) + data_2_i[0]);
             end
     end
-
+/* verilator lint_off LATCH */
     always @(*)begin
             for (i = 0; i < 16; i = i + 1) begin
             if(group==1)begin

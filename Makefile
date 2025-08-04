@@ -15,7 +15,7 @@ CPPFLAGS = -DVL_DEBUG
 all: vhdl
 
 obj_dir/V${TOP}.mk: ${V_SRC} ${TESTBENCH_SRC} 
-	verilator -Wall --Wno-BLKSEQ --Wno-UNDRIVEN --Wno-PINCONNECTEMPTY --Wno-unused --Wno-UNOPTFLAT --Wno-IMPLICIT --Wno-WIDTH --cc --exe --build ${TESTBENCH_SRC} ${INC} ${VTOP} --trace
+	verilator -Wall --Wno-BLKSEQ --Wno-UNDRIVEN --Wno-PINCONNECTEMPTY --Wno-unused --Wno-IMPLICIT --Wno-WIDTH --cc --exe --build ${TESTBENCH_SRC} ${INC} ${VTOP} --trace
 	
 obj_dir/V${TOP} : obj_dir/V${TOP}.mk
 	$(MAKE) -C obj_dir -f V${TOP}.mk

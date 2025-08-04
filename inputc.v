@@ -30,7 +30,7 @@ module inputc #(parameter  ROUTERID = 0 , parameter  PCHID = 0)(
     output reg [`PORT_NUM-1:0] port,
     output reg ovalid,
     output reg [`VCH_WIDTH_NUM - 1:0] ovch,
-    output reg [`DATA_WIDTH-1:0] odata,
+    output reg [`DATA_WIDTH-1:0] odata
 
 );
 
@@ -67,10 +67,10 @@ wire [`DATA_WIDTH-1:0] odata1;
 wire [`DATA_WIDTH-1:0] odata2;
 wire [`DATA_WIDTH-1:0] odata3;
 
-assign odata0 = (send0 && btype0 != `TYPE_NONE) ? buf_data0 : `DATA_WIDTH'b0;
-assign odata1 = (send1 && btype1 != `TYPE_NONE) ? buf_data1 : `DATA_WIDTH'b0;
-assign odata2 = (send2 && btype2 != `TYPE_NONE) ? buf_data2 : `DATA_WIDTH'b0;
-assign odata3 = (send3 && btype3 != `TYPE_NONE) ? buf_data3 : `DATA_WIDTH'b0;
+assign odata0 = rc_data0 ;
+assign odata1 = rc_data1;
+assign odata2 = rc_data2;
+assign odata3 = rc_data3;
 
 wire ovalid0,ovalid1,ovalid2,ovalid3;
 assign ovalid0 = (send0 && btype0 != `TYPE_NONE);
@@ -137,7 +137,7 @@ vc #(ROUTERID, PCHID ,0) vc0(
     .clk(clk),
     .reset(reset),
 
-    .idata(buf_data0),
+    .idata(rc_data0),
     .send(send0),
 
     .olck(olck[0]),
@@ -169,7 +169,7 @@ vc #(ROUTERID, PCHID ,0) vc1(
     .clk(clk),
     .reset(reset),
 
-    .idata(buf_data1),
+    .idata(rc_data1),
     .send(send1),
 
     .olck(olck[1]),
@@ -201,7 +201,7 @@ vc #(ROUTERID, PCHID ,0) vc2(
     .clk(clk),
     .reset(reset),
 
-    .idata(buf_data2),
+    .idata(rc_data2),
     .send(send2),
 
     .olck(olck[2]),
@@ -233,7 +233,7 @@ vc #(ROUTERID, PCHID ,0) vc3(
     .clk(clk),
     .reset(reset),
 
-    .idata(buf_data3),
+    .idata(rc_data3),
     .send(send3),
 
     .olck(olck[3]),
@@ -268,6 +268,11 @@ assign btype1 = buf_data1 [`TYPE_MSB:`TYPE_LSB];
 assign btype2 = buf_data2 [`TYPE_MSB:`TYPE_LSB];
 assign btype3 = buf_data3 [`TYPE_MSB:`TYPE_LSB];
 
+wire [`DATA_WIDTH-1 : 0] rc_data0;
+wire [`DATA_WIDTH-1 : 0] rc_data1;
+wire [`DATA_WIDTH-1 : 0] rc_data2;
+wire [`DATA_WIDTH-1 : 0] rc_data3;
+
 rtcomp #(ROUTERID)rc0(
     .clk(clk),
     .reset(reset),
@@ -276,7 +281,7 @@ rtcomp #(ROUTERID)rc0(
     .en(btype0 == `TYPE_HEAD || btype0 == `TYPE_HEADTAIL || btype0 == `TYPE_TEST || btype0 == `TYPE_ACK || btype0 == `TYPE_ACK_BACK),
     .idata(buf_data0),
 
-    .odata(buf_data0),
+    .odata(rc_data0),
     .port(port0), //to vc / vcmux
     .ovch(ovch0) // to vc / vcmux
 
@@ -290,7 +295,7 @@ rtcomp #(ROUTERID)rc1(
     .en(btype1 == `TYPE_HEAD || btype1 == `TYPE_HEADTAIL || btype1 == `TYPE_TEST || btype1 == `TYPE_ACK || btype1 == `TYPE_ACK_BACK),
     .idata(buf_data1),
     
-    .odata(buf_data1),
+    .odata(rc_data1),
     .port(port1),
     .ovch(ovch1)
 );
@@ -303,7 +308,7 @@ rtcomp #(ROUTERID)rc2(
     .en(btype2 == `TYPE_HEAD || btype2 == `TYPE_HEADTAIL || btype2 == `TYPE_TEST || btype2 == `TYPE_ACK || btype2 == `TYPE_ACK_BACK),
     .idata(buf_data2),
     
-    .odata(buf_data2),
+    .odata(rc_data2),
     .port(port2),
     .ovch(ovch2)
 );
@@ -316,7 +321,7 @@ rtcomp #(ROUTERID)rc3(
     .en(btype3 == `TYPE_HEAD || btype3 == `TYPE_HEADTAIL || btype3 == `TYPE_TEST || btype3 == `TYPE_ACK || btype3 == `TYPE_ACK_BACK),
     .idata(buf_data3),
     
-    .odata(buf_data3),
+    .odata(rc_data3),
     .port(port3),
     .ovch(ovch3)
 );

@@ -94,7 +94,7 @@ detect #(ROUTERID)detect0(
     //testmode
     .test_set(test_set_to_input)
 );
-
+/* verilator lint_off NULLPORT */
 inputc #( ROUTERID,0) input_unit0(
     .clk(clk),
     .reset(reset),

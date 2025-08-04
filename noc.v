@@ -145,7 +145,7 @@ module noc (
     output reg [`VCH_WIDTH - 1 : 0]     n15_ordy_p0,
     output reg [`DATA_WIDTH - 1 : 0]    n15_odata_p0,
     output reg                          n15_ovalid_p0,
-    output reg n15_test_set,
+    output reg n15_test_set
 );
 
 //n0 --> n1  port 0

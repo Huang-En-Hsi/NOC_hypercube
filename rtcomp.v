@@ -12,7 +12,7 @@ module rtcomp #(parameter  ROUTERID = 0)(
 );
 
 wire [4:0] num;
-assign num = (idata[`NUM_MSB:`NUM_LSB]<<1);//num*2
+assign num = idata[`NUM_MSB:`NUM_LSB];
 //genPath output  (input smallPath)
     wire  [1:0] data_0_o [0:3];
     wire  [1:0] data_1_o [0:2];
@@ -66,43 +66,46 @@ assign num = (idata[`NUM_MSB:`NUM_LSB]<<1);//num*2
     end
 
 integer i,j;
-wire [3:0] idx;
+wire [4:0] idx;
 wire [4:0] idx_port;
 wire [5:0] idx_rdata;//wirt data
 assign idx = idata[`IDX_MSB:`IDX_LSB];
 assign idx_port=(idx<<1);
 assign idx_rdata=(idx<<2);
 /*
-`DATA_MSB~18 (32 bit) wirt path
-1 0 用來進行test
-17~2 (16 bit) wirt ROUTERID
+`DATA_MSB~17 (32 bit) wirt path
+15~0 (16 bit) wirt ROUTERID
 若16bit不夠寫走過的ROUTERID，會將剩下的寫到下一個封包
 */
+/* verilator lint_off LATCH */
 always@(*)begin
-    ovch = ivch;
     odata=idata;
     if(en)begin
+        ovch0 = ivch;
         if(idx==0 && idata[`DATA_MSB:`DATA_LSB]==50'b0)begin//判斷是否是來源且是第一筆資料，只能處理偶數
-            for(i=0,j=`DATA_MSB;i<16;i=i+1,j=j-2)begin
-                    odata[j -: 2]=path[i];
+            j = `DATA_MSB;
+            for(i=0; i<16; i=i+1) begin
+                odata[j -: 2] = path[i];
+                j = j - 2;
             end
             port0=odata[`DATA_MSB-idx_port -:2];
             odata[`IDX_MSB:`IDX_LSB]=idx+1;//idx
-            
-        end else if(idx==(num-1)) begin
-                port0=4;
-                if(17 - idx_rdata >= 5)begin
-                    odata[17-idx_rdata -: 4]=ROUTERID;
+        end else if(idx==num) begin
+                if(idx>12)begin
+                    odata[idx_rdata-((13<<2)) +: 4]=ROUTERID;
                 end
+                port0=4;
         end else begin
-            port0=idata[`DATA_MSB-idx_port -: 2];
-            if(17 - idx_rdata >= 5)begin
-                odata[17-idx_rdata -: 4]=ROUTERID;
+            if(idx>12)begin
+                odata[idx_rdata-((13<<2)) +: 4]=ROUTERID;
             end
+            port0=idata[`DATA_MSB-idx_port -: 2];
             odata[`IDX_MSB:`IDX_LSB]=idx+1;
         end
     end else begin
-        odata[`DATA_MSB-idx_rdata -: 4]=ROUTERID;
+        if (idx>0 && idx<=12)begin
+            odata[(idx_rdata-4) +: 4]=ROUTERID;
+        end
         odata[`IDX_MSB:`IDX_LSB]=idx+1;
     end
     
