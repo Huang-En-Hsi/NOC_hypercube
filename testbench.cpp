@@ -8,10 +8,13 @@
 #define MAX_SIM_CYCLE 500
 //vluint64_t 提供仿真時間之type
 vluint64_t main_time = 0;
-
-//u_int64_t data_buff[2] = {0x2180000000000000,0x4180000000000000}; //010212 : 12->13->15->14->10->8->12 : C D F E A 8 C
-//u_int64_t data_buff[2] = {0x2400000000000000,0x4400000000000000};//0102010301020103 : 12 13 15 14 10 11 9 8 0 1 3 2 6 7 5 4 12 : c d f e a  b 9 8 0 1 3 2 6 7 5 4 c
-u_int64_t data_buff[2] = {0x2300000000000000,0x4300000000000000};//010201032030 : 13/15/14/10/11/9/8/0/4/5/13/12 : d/f/e/a/b/9/8/0/4/5/d/c
+//u_int64_t data_buff[2] = {0x2100000000000000,0x4100000000000000};//4
+//u_int64_t data_buff[2] = {0x2180000000000000,0x4180000000000000}; //6
+//u_int64_t data_buff[2] = {0x2200000000000000,0x4200000000000000};//8
+//u_int64_t data_buff[2] = {0x2280000000000000,0x4280000000000000};//10
+//u_int64_t data_buff[2] = {0x2300000000000000,0x4300000000000000};//12
+u_int64_t data_buff[2] = {0x2380000000000000,0x4380000000000000};//14
+//u_int64_t data_buff[2] = {0x2400000000000000,0x4400000000000000};//16
 double sc_time_stamp(int len)//時間戳產生器（for VCD），這是 Verilator 用來生成模擬時間戳的要求
  {
     return (main_time%len);
@@ -50,17 +53,17 @@ double sc_time_stamp(int len)//時間戳產生器（for VCD），這是 Verilato
     
     for( int i=0; i<MAX_SIM_CYCLE;i++) {
         top->clk=0;
-        if(top -> n12_test_set == 0){
+        if(top -> n0_test_set == 0){
         //if(1){
         if (count >= 2)
             {
-                top->n12_idata_p0 = 0;
-                top->n12_ivalid_p0 = 0;
-                top->n12_ivch_p0 = 0b00;
+                top->n0_idata_p0 = 0;
+                top->n0_ivalid_p0 = 0;
+                top->n0_ivch_p0 = 0b00;
             }else if (count < 2){
-                top->n12_idata_p0  = data_buff[count];
-                top->n12_ivalid_p0 = ivalid;
-                top->n12_ivch_p0= 0b11;
+                top->n0_idata_p0  = data_buff[count];
+                top->n0_ivalid_p0 = ivalid;
+                top->n0_ivch_p0= 0b11;
             }
             //printf("%d\n",count);
             count++;

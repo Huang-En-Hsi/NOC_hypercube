@@ -1,9 +1,9 @@
 `include "defines.v"
 module genPath(
     input wire  [4:0] num,
-    output reg  [1:0] data_0_o [0:3],
-    output reg  [1:0] data_1_o [0:2],
-    output reg  [1:0] data_2_o [0:1],
+    output reg [7:0] data_0_o,
+    output reg [5:0] data_1_o,
+    output reg [3:0] data_2_o,
     output reg  [2:0] len_0_o,
     output reg  [1:0] len_1_o,
     output reg  [1:0] len_2_o,
@@ -22,7 +22,7 @@ module genPath(
     );
 
     always @(*) begin
-        m_i = m_0 + 2;
+        m_i = (num>8)?{2'b00,m_0}:m_0+2;
     end
 
     findPower u_fp1 (
@@ -51,45 +51,27 @@ module genPath(
     end
 
     always @(*) begin
-        data_0_o[0] = 0;
-        data_0_o[1] = 1;
-        data_0_o[2] = 2;
-        data_0_o[3] = 3;
+        data_0_o[1:0] = 0;
+        data_0_o[3:2] = 1;
+        data_0_o[5:4] = 2;
+        data_0_o[7:6] = 3;
 
-        data_1_o[0] = (n_0 > 1) ? n_0 - 1 : 0;
-        data_1_o[1] = n_0;
-        data_1_o[2] = (n_0 < 3) ? n_0 + 1 : 0;
+        if(num>8)begin
+        data_1_o[1:0] =data_0_o[(7-m_0) -:2];
+        data_1_o[3:2] =((7-m_0+2)<=7)?data_0_o[(7-m_0+2) -:2]:0;
+        data_1_o[5:4] =((7-m_0+4)<=7)?data_0_o[(7-m_0+4) -:2]:0;
 
-        data_2_o[0] = ((n_0 + n_1 - 2) > 0 && (n_0 + n_1 - 2) < 4) ? (n_0 + n_1 - 2) : 0;
-        data_2_o[1] = ((n_0 + n_1 - 1) > 0 && (n_0 + n_1 - 1) < 4) ? (n_0 + n_1 - 1) : 0;
-    end
-
-endmodule
-
-/*module findPower (
-  input  wire [4:0] num_i,
-  output reg  [2:0] n_o,
-  output reg  [2:0] m_o
-);
-
-    always @(*) begin
-      if (num_i[4] == 1'b1) begin
-            n_o = 3'd4;
-        m_o = num_i[3:0];
-        end else if (num_i[3] == 1'b1) begin
-            n_o = 3'd3;
-          m_o = {1'b0,num_i[2:0]};
-        end else if (num_i[2] == 1'b1) begin
-            n_o = 3'd2;
-            m_o = {1'b0, num_i[1:0]};
-        end else if (num_i[1] == 1'b1) begin
-            n_o = 3'd1;
-            m_o = {2'b00, num_i[0]};
+        data_2_o[1:0] = 1;
+        data_2_o[3:2] = 2;  
         end else begin
-            n_o = 3'd0;
-            m_o = 3'b000;
+        data_1_o[1:0] = (n_0 > 1) ? n_0 - 1 : 0;
+        data_1_o[3:2] = n_0;
+        data_1_o[5:4] = (n_0 < 3) ? n_0 + 1 : 0;
+
+        data_2_o[1:0] = ((n_0 + n_1 - 2) > 0 && (n_0 + n_1 - 2) < 4) ? (n_0 + n_1 - 2) : 0;
+        data_2_o[3:2] = ((n_0 + n_1 - 1) > 0 && (n_0 + n_1 - 1) < 4) ? (n_0 + n_1 - 1) : 0;  
         end
+        
     end
 
 endmodule
-*/

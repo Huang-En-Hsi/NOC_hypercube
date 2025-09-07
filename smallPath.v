@@ -4,17 +4,15 @@ module smallPath(
     input  wire [2:0]  len_0_i,
     input  wire [1:0]  len_1_i,
     input  wire [1:0]  len_2_i,
-    input  wire [1:0]  data_0_i [0:3],
-    input  wire [1:0]  data_1_i [0:2],
-    input  wire [1:0]  data_2_i [0:1],
-    output reg [1:0]   data_o [0:15]
+    input  wire [7:0]  data_0_i,
+    input  wire [5:0]  data_1_i,
+    input  wire [3:0]  data_2_i,
+    output reg [31:0]   data_o
 );
 
-    integer i;
-    reg [1:0] data_0_o [0:15];
-    reg [1:0] data_1_o [0:7];
-    reg [1:0] data_2_o [0:3];
-
+    reg [31:0] data_0_o;
+    reg [15:0] data_1_o;
+    reg [7:0] data_2_o;
 
     //用最大步數建表 DIM=4,0102010301020103
     function [1:0] tb;
@@ -34,57 +32,61 @@ module smallPath(
         end
     endfunction
 
+    integer i;
     
     always @(*) begin
         for (i = 0; i < 16; i = i + 1) begin
             if (len_0_i < 4 && i > (1 << len_0_i) - 1)
-                data_0_o[i] = 0;
+                data_0_o[(i<<1) +:2] = 2'b0;
             else if (i==(1 << len_0_i) - 1)
-                data_0_o[i] = data_0_i[ len_0_i-1];
+                data_0_o[(i<<1) +:2] = data_0_i[ ((len_0_i<<1)-2) +:2];
             else
-                data_0_o[i] = tb(i);
+                data_0_o[(i<<1) +:2] = tb(i);
         end
 
         for (i = 0; i < 8; i = i + 1) begin
             if (len_1_i == 0 || i > (1 << len_1_i) - 1)
-                data_1_o[i] = 0;
+                data_1_o[(i<<1) +:2] = 2'b0;
             else if(i==(1 << len_1_i) - 1)
-                data_1_o[i] = data_1_i[len_1_i-1];
+                data_1_o[(i<<1) +:2] = data_1_i[((len_1_i<<1)-2) +:2];
             else
-                data_1_o[i] = ((tb(i) + data_1_i[0]) > 3) ? 0 : (tb(i) + data_1_i[0]);
+                data_1_o[(i<<1) +:2] = ((tb(i) + data_1_i[0 +:2]) > 3) ? 0 : (tb(i) + data_1_i[0 +:2]);
             end
 
         for (i = 0; i < 4; i = i + 1) begin
             if (len_2_i == 0 || i > (1 << len_2_i) - 1)
-                data_2_o[i] = 0;
+                data_2_o[(i<<1) +:2] = 2'b0;
             else if(i==(1 << len_2_i) - 1)
-                data_2_o[i] = data_2_i[len_2_i-1];
+                data_2_o[(i<<1) +:2] = data_2_i[(len_2_i<<1)-2 +:2];
             else
-                data_2_o[i] = ((tb(i) + data_2_i[0]) > 3) ? 0 : (tb(i) + data_2_i[0]);
+                data_2_o[(i<<1) +:2] = ((tb(i) + data_2_i[0 +:2]) > 3) ? 0 : (tb(i) + data_2_i[0 +:2]);
             end
     end
-/* verilator lint_off LATCH */
+    /* verilator lint_off LATCH */
     always @(*)begin
-            for (i = 0; i < 16; i = i + 1) begin
+        for (i = 0; i < 32; i = i + 2) begin
             if(group==1)begin
-                data_o[i]=data_0_o[i];
-            end
-            if(group==2)begin
-                if(i>=((1<<len_0_i)-1) && i<15)begin
-                    data_o[i]=data_1_o[i-((1<<len_0_i)-1)+1];
+                data_o[i +:2]=data_0_o[i +:2];
+            end else if(group==2)begin
+                if(i>=(((1<<len_0_i)-1)<<1) && i<=(((1<<len_0_i)+(1<<len_1_i)-1)<<1))begin
+                    data_o[i +:2]=(i==14 || i==(((1<<len_0_i)+(1<<len_1_i)-1)<<1))?3:
+                    (i>14)?data_1_o[(i-((1<<len_0_i)<<1)) +:2]:
+                    data_1_o[(i-(((1<<len_0_i)-1)<<1))+2 +:2];
                 end else begin
-                    data_o[i]=data_0_o[i];
+                    data_o[i +:2]=data_0_o[i +:2];
                 end
-            end
-            if(group==3)begin
-                if(i>=((1<<len_0_i)-1) && i<((1<<len_0_i)-1+(1<<len_1_i)-2))begin//group=2
-                    data_o[i]=data_1_o[i-((1<<len_0_i)-1)+1];
-                end else if(i>=((1<<len_0_i)-1+(1<<len_1_i)-2) && i<15)begin//group=3
-                    data_o[i]=data_2_o[i-((1<<len_0_i)-1+(1<<len_1_i)-2)+1];
+            end else if(group==3)begin
+                if(i>=(((1<<len_0_i)-1)<<1) && i<(((1<<len_0_i)+(1<<len_1_i)-1)<<1))begin//group=2
+                    data_o[i +:2]=(i==14)?3:data_1_o[(i-((1<<len_0_i)<<1)) +:2];
+                end else if(i>=(((1<<len_0_i)+(1<<len_1_i)-1)<<1) && i<=(((1<<len_0_i)+(1<<len_1_i)+len_2_i-1)<<1))begin//group=3
+                    data_o[i +:2]=(i==(((1<<len_0_i)+(1<<len_1_i)+len_2_i-1)<<1))?3:data_2_o[i-(((1<<len_0_i)+(1<<len_1_i)-1)<<1)+2 +:2];
                 end else begin//group=1
-                    data_o[i]=data_0_o[i];
+                    data_o[i +:2]=data_0_o[i +:2];
                 end
+            end else begin
+                data_o = 32'b0;
             end
         end
     end
 endmodule
+
